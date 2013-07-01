@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include "IRMilesTagDefines.h"
+
+// Primitive test suites, just to check that the general gist of the
+// bit manipulation code to extract higher level events from the decoded
+// data.
+
+void assertEquals(int expected, int actual, const char* desc) {
+	if (expected != actual) {
+		printf( "## FAILED: %s, expected %d, got %d\n", desc, expected, actual);
+	} else {
+		printf( "%s: %d\n", desc, actual );
+	}
+}
+
+void testMsg(int msg, int param, const char* desc) {
+
+	printf("\nTEST: Msg\n");
+	printf("Message: %d (%s)\n", msg, desc);
+	printf("Param  : %d\n", param);
+
+	unsigned long msg_packed = MT_MSG(msg, param);
+
+	printf("Message (packed): %d\n", msg_packed);
+
+	if (!MT_IS_MSG(msg_packed)) {
+		printf("FAILED: Message %d (%s - packed) is not a valid message.", msg_packed);
+		return;
+	}
+
+	int msg_unpacked   = MT_MSG_BYTE_1(msg_packed);
+	int param_unpacked = MT_MSG_BYTE_2(msg_packed);
+
+	assertEquals(msg, msg_unpacked, "Msg");
+	assertEquals(param, param_unpacked, "Param");
+}
+
+void testMsgs() {
+	testMsg( MT_MSG_ADD_HEALTH, 75, "add health" );
+	testMsg( MT_MSG_PICKUP_HEALTH, 0x0A, "pickup health" );
+}
+
+void testCmd(int cmd, const char* desc) {
+	printf("\nTEST: Cmd\n");
+	printf("Command: %d (%s)\n", cmd, desc);
+
+	unsigned long cmd_packed = MT_CMD(cmd);
+
+	printf("Command (packed): %d\n", cmd_packed);
+
+	if (!MT_IS_CMD(cmd_packed)) {
+		printf("## FAILED: Command %d (%s - packed) is not a valid command.", cmd_packed);
+		return;
+	}
+
+	int cmd_unpacked = MT_CMD_VALUE(cmd_packed);
+	assertEquals(cmd, cmd_unpacked, "Cmd");
+}
+
+void testCmds() {
+	testCmd( MT_CMD_ADMIN_KILL, "admin kill" );
+	testCmd( MT_CMD_CLEAR_SCORES, "clear scores" );
+	testCmd( MT_CMD_END_GAME, "end game" );
+}
+
+void testShot() {
+
+	printf("\nTEST: Shot\n");
+
+	int player = 51;
+	int team   = 2;
+	int damage = MT_DAMAGE_75;
+
+	printf("Player: %d\n", player);
+	printf("Team  : %d\n", team);
+	printf("Damage: %d\n", damage);
+
+	unsigned long shot = MT_SHOT(player, team, damage);
+
+	printf("Shot (packed): %d\n", shot);
+
+	unsigned int player_unpacked = MT_PLAYER_VALUE(shot);
+	unsigned int team_unpacked   = MT_TEAM_VALUE(shot);
+	unsigned int damage_unpacked = MT_DAMAGE_VALUE(shot);
+
+	assertEquals(player, player_unpacked, "Player");
+	assertEquals(team, team_unpacked, "Team");
+	assertEquals(damage, damage_unpacked, "Damage");
+
+}
+
+int main(void) {
+
+	testShot();
+	testMsgs();
+	testCmds();
+
+	return 1;
+}

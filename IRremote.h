@@ -45,6 +45,8 @@ public:
 #define JVC 8
 #define SANYO 9
 #define MITSUBISHI 10
+#define MILES_TAG_II 11 // Spec for miles tag protocol - http://www.lasertagparts.com/mtformat-2.htm
+
 #define UNKNOWN -1
 
 // Decoded value for NEC when a repeat code is received
@@ -56,7 +58,7 @@ class IRrecv
 public:
   IRrecv(int recvpin);
   void blink13(int blinkflag);
-  int decode(decode_results *results);
+  virtual int decode(decode_results *results);
   void enableIRIn();
   void resume();
 private:

@@ -172,12 +172,10 @@
 #define TICKS_LOW(us) (int) (((us)*LTOL/USECPERTICK))
 #define TICKS_HIGH(us) (int) (((us)*UTOL/USECPERTICK + 1))
 
-#ifndef DEBUG
-int MATCH(int measured, int desired) {return measured >= TICKS_LOW(desired) && measured <= TICKS_HIGH(desired);}
-int MATCH_MARK(int measured_ticks, int desired_us) {return MATCH(measured_ticks, (desired_us + MARK_EXCESS));}
-int MATCH_SPACE(int measured_ticks, int desired_us) {return MATCH(measured_ticks, (desired_us - MARK_EXCESS));}
-// Debugging versions are in IRremote.cpp
-#endif
+// IRremote.cpp includes two versions, depending on the DEBUG flag.
+int MATCH(int measured, int desired);
+int MATCH_MARK(int measured_ticks, int desired_us);
+int MATCH_SPACE(int measured_ticks, int desired_us);
 
 // receiver states
 #define STATE_IDLE     2
@@ -213,9 +211,6 @@ extern volatile irparams_t irparams;
 #define MIN_RC6_SAMPLES 1
 #define PANASONIC_BITS 48
 #define JVC_BITS 16
-
-
-
 
 // defines for timer2 (8 bits)
 #if defined(IR_USE_TIMER2)
